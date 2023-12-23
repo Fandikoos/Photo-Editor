@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+         <children>
+            <Label fx:id="lbStatus" layoutX="91.0" layoutY="22.0" text="Label" />
+            <ProgressBar fx:id="pbProgressBar" layoutX="55.0" layoutY="167.0" prefWidth="200.0" progress="0.0" />
+            <ImageView fx:id="sourceImageView" fitHeight="123.0" fitWidth="163.0" layoutX="65.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="targetImageView" fitHeight="123.0" fitWidth="163.0" layoutX="287.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true" />
+            <Button fx:id="saveButton" layoutX="486.0" layoutY="89.0" mnemonicParsing="false" onAction="#saveImage" text="Button" />
+         </children>
+      </AnchorPane>
+   </children>
+</VBox>
