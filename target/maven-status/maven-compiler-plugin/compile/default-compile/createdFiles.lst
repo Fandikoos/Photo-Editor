@@ -1,0 +1,10 @@
+com\svalero\downloader\filters\BrigtherFilter.class
+com\svalero\downloader\controller\AppController.class
+com\svalero\downloader\task\HistorialTask.class
+com\svalero\downloader\controller\FilterController.class
+com\svalero\downloader\App.class
+com\svalero\downloader\filters\SepiaFilter.class
+com\svalero\downloader\filters\ColorInversionFilter.class
+com\svalero\downloader\filters\EnhanceContrastFilter.class
+com\svalero\downloader\task\FilterTask.class
+com\svalero\downloader\filters\GrayscaleFilter.class
