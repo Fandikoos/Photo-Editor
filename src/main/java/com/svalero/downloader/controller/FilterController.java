@@ -1,7 +1,7 @@
 package com.svalero.downloader.controller;
 
 import com.svalero.downloader.task.FilterTask;
-import com.svalero.downloader.task.HistorialTask;
+import com.svalero.downloader.task.SQLiteDB;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
@@ -51,7 +51,6 @@ public class FilterController implements Initializable {
     private BufferedImage outputImage;
     private BufferedImage sourceImage;
     private Image workingImage;
-    private List<HistorialTask> historial = new ArrayList<>();
 
     //Constructor de nuestra clase y en el que recogeremos la imagen seleccionada y el filtro
     public FilterController(File sourceImageFile, List<String> selectedFilters){
@@ -135,6 +134,7 @@ public class FilterController implements Initializable {
         this.selectedFilters = new ArrayList<String>(
                 this.filterListView.getSelectionModel().getSelectedItems());
         applyBatchFilters();
+        SQLiteDB.insertHistorial(sourceImageFile.getName(), String.join(", ", selectedFilters));
     }
 
     @FXML

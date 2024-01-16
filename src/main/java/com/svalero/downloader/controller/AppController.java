@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.*;
 
 
-import com.svalero.downloader.task.HistorialTask;
+import com.svalero.downloader.task.SQLiteDB;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -31,9 +31,6 @@ public class AppController implements Initializable {
 
     ObservableList<String> selectedItems;
 
-    private List<HistorialTask> history = new ArrayList<>();
-
-
     public AppController(){
 
     }
@@ -41,6 +38,7 @@ public class AppController implements Initializable {
     //Inicializamos la ListView con todos los posibles filtros
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        SQLiteDB.initializeDatabase();
         this.batchFilterListView.getItems().addAll("Grayscale", "Brighter", "Sepia", "Enhance Contrast", "Color Inversion");
         this.batchFilterListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //Para poder seleccionar varias opciones
@@ -66,8 +64,7 @@ public class AppController implements Initializable {
             VBox filterBox = loader.load();
 
             //Creamos el historial
-            HistorialTask historialTask = new HistorialTask(imageFile.getName(), selectedFilters);
-            history.add(historialTask);
+            SQLiteDB.insertHistorial(imageFile.getName(), String.join(", ", selectedFilters));
 
             String fileName = imageFile.getName();
             System.out.println(fileName);
@@ -112,30 +109,9 @@ public class AppController implements Initializable {
         Platform.exit();
     }
 
-    public List<HistorialTask> getHistory(){
-        return new ArrayList<>(history);
-    }
-
     @FXML
     public void showHistorial(){
-        //Obtenemos el historial
-        List<HistorialTask> history = getHistory();
-
-        //Creamos una cadena de caracteres que se concatenará más tarde con el nombre de archivo y filtros
-        StringBuilder message = new StringBuilder("History:\n");
-
-        //Recorremos el array recogiendo todos los nombres de los archivos y su selección de filtros correspondientes
-        for (HistorialTask entry : history){
-            message.append("Archivo: ").append(entry.getImageName()).append("\n");
-            message.append("Filtros: ").append(entry.getAppliedFilters()).append("\n\n");
-        }
-
-        //Creamos un alert para mostrar el la informacion del historial
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("History");
-        alert.setHeaderText(null);
-        alert.setContentText(message.toString());
-        alert.showAndWait();
+        SQLiteDB.showHistorial();
     }
 
 }
