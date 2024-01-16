@@ -1,6 +1,5 @@
 package com.svalero.downloader.task;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 

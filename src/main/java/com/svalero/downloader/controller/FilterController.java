@@ -2,6 +2,7 @@ package com.svalero.downloader.controller;
 
 import com.svalero.downloader.task.FilterTask;
 import com.svalero.downloader.task.HistorialTask;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -33,33 +34,62 @@ public class FilterController implements Initializable {
     private ImageView targetImageView;
     @FXML
     private Button saveButton;
+    @FXML
+    private Button undoButton;
+    @FXML
+    private Button redoButton;
+    @FXML
+    private Button applyFilterButton;
+    @FXML
+    private ListView filterListView;
 
-    private File sourceImage;
+    ObservableList<String> selectedItems;
+
+    private File sourceImageFile;
     private List<String> selectedFilters;
     private FilterTask filterTask;
     private BufferedImage outputImage;
+    private BufferedImage sourceImage;
+    private Image workingImage;
     private List<HistorialTask> historial = new ArrayList<>();
 
     //Constructor de nuestra clase y en el que recogeremos la imagen seleccionada y el filtro
-    public FilterController(File sourceImage, List<String> selectedFilters){
-        this.sourceImage = sourceImage;
-        this.selectedFilters = selectedFilters;
+    public FilterController(File sourceImageFile, List<String> selectedFilters){
+        this.sourceImageFile = sourceImageFile;
         this.outputImage = null;
+        this.selectedFilters = selectedFilters;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        this.filterListView.getItems().addAll("Grayscale", "Sepia", "Brigther", "Color Inversion", "Enhance Contrast");
+        this.filterListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         InputStream stream;
         try {
             //Cargamos la imagen que hemos seleccionado en la interfaz gráfica
-            stream = new FileInputStream(sourceImage.getAbsolutePath());
+            stream = new FileInputStream(this.sourceImageFile.getAbsolutePath());
             //Creamos la imagen
             Image image = new Image(stream);
             //La conectamos a la interfaz gráfica
             this.sourceImageView.setImage(image);
-        } catch (FileNotFoundException e){
+            this.sourceImage = ImageIO.read(this.sourceImageFile);
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        this.saveButton.setDisable(true);
+        this.undoButton.setDisable(true);
+        this.redoButton.setDisable(true);
+        //No trabajamos en modo batch porque no hay ningun filtro seleccionado
+        if (this.selectedFilters.size() > 0) {
+            applyBatchFilters();
+        }
+    }
+
+    private void applyBatchFilters(){
+        this.undoButton.setDisable(true);
+        this.redoButton.setDisable(true);
+        this.saveButton.setDisable(true);
+
         try {
             filterTask = new FilterTask(this.sourceImage, this.selectedFilters);
 
@@ -79,8 +109,11 @@ public class FilterController implements Initializable {
             //Una vez que la tare finaliza de manera exitosa recogemos ese BufferedImage (la imagen) que nos devuelve FilterTask
             filterTask.setOnSucceeded(event -> {
                 this.outputImage = filterTask.getValue();
-                Image image = SwingFXUtils.toFXImage(outputImage, null);
-                this.targetImageView.setImage(image);
+                this.sourceImage = this.outputImage;
+                this.workingImage = SwingFXUtils.toFXImage(outputImage, null);
+                this.targetImageView.setImage(workingImage);
+                this.saveButton.setDisable(false);
+                this.undoButton.setDisable(false);
             });
 
             //Se va actualizando nuestra barra de descarga
@@ -98,6 +131,13 @@ public class FilterController implements Initializable {
     }
 
     @FXML
+    private void applyFilters(ActionEvent event){
+        this.selectedFilters = new ArrayList<String>(
+                this.filterListView.getSelectionModel().getSelectedItems());
+        applyBatchFilters();
+    }
+
+    @FXML
     public void saveImage(ActionEvent event){
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save file");
@@ -108,6 +148,31 @@ public class FilterController implements Initializable {
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void undoFilters(ActionEvent event){
+        InputStream stream;
+        try {
+            stream = new FileInputStream(this.sourceImageFile.getAbsolutePath());
+            this.sourceImage = ImageIO.read(this.sourceImageFile);
+            Image image = new Image(stream);
+            this.targetImageView.setImage(image);
+            this.saveButton.setDisable(true);
+            this.undoButton.setDisable(true);
+            this.redoButton.setDisable(false);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void redoFilters(ActionEvent event){
+        this.targetImageView.setImage(this.workingImage);
+        this.sourceImage = this.outputImage;
+        this.saveButton.setDisable(false);
+        this.redoButton.setDisable(true);
+        this.undoButton.setDisable(false);
     }
 
 }
