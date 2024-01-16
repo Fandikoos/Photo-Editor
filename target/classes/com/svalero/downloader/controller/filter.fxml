@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -12,10 +13,14 @@
       <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
          <children>
             <Label fx:id="lbStatus" layoutX="91.0" layoutY="22.0" text="Label" />
-            <ProgressBar fx:id="pbProgressBar" layoutX="55.0" layoutY="167.0" prefWidth="200.0" progress="0.0" />
+            <ProgressBar fx:id="pbProgressBar" layoutX="28.0" layoutY="191.0" prefWidth="200.0" progress="0.0" />
             <ImageView fx:id="sourceImageView" fitHeight="123.0" fitWidth="163.0" layoutX="65.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true" />
-            <ImageView fx:id="targetImageView" fitHeight="123.0" fitWidth="163.0" layoutX="287.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true" />
-            <Button fx:id="saveButton" layoutX="476.0" layoutY="114.0" mnemonicParsing="false" onAction="#saveImage" text="Save" />
+            <ImageView fx:id="targetImageView" fitHeight="123.0" fitWidth="163.0" layoutX="257.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true" />
+            <Button fx:id="saveButton" layoutX="480.0" layoutY="187.0" mnemonicParsing="false" onAction="#saveImage" text="Save" />
+            <Button fx:id="undoButton" layoutX="404.0" layoutY="187.0" mnemonicParsing="false" onAction="#undoFilters" text="Undo" />
+            <Button fx:id="applyFilterButton" layoutX="257.0" layoutY="187.0" mnemonicParsing="false" onAction="#applyFilters" text="Apply" />
+            <Button fx:id="redoButton" layoutX="332.0" layoutY="187.0" mnemonicParsing="false" onAction="#redoFilters" text="Redo" />
+            <ListView fx:id="filterListView" layoutX="450.0" layoutY="37.0" prefHeight="129.0" prefWidth="126.0" />
          </children>
       </AnchorPane>
    </children>

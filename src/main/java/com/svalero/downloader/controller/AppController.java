@@ -1,42 +1,35 @@
 package com.svalero.downloader.controller;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
 
-import com.svalero.downloader.task.HistorialTask;
+import com.svalero.downloader.task.SQLiteDB;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class AppController implements Initializable {
 
     @FXML
-    private Label infoImageLabel;
+    private Label imagePathLabel;
     @FXML
-    private Button btOpenImage;
+    private TabPane tpFilters;
     @FXML
-    private Button btCreateFilter;
-    @FXML
-    private TabPane tpFilter;
-    @FXML
-    private ListView filterListView;
+    private ListView batchFilterListView;
     @FXML
     private Button showHistorial;
 
     ObservableList<String> selectedItems;
-
-    private File file;
-    private List<HistorialTask> history = new ArrayList<>();
 
     public AppController(){
 
@@ -45,68 +38,80 @@ public class AppController implements Initializable {
     //Inicializamos la ListView con todos los posibles filtros
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        tpFilter.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
-        this.filterListView.getItems().addAll("Grayscale", "Brighter", "Sepia", "Enhance Contrast", "Color Inversion");
+        SQLiteDB.initializeDatabase();
+        this.batchFilterListView.getItems().addAll("Grayscale", "Brighter", "Sepia", "Enhance Contrast", "Color Inversion");
+        this.batchFilterListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //Para poder seleccionar varias opciones
-        this.filterListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        tpFilters.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
     //Seleccionamos el fichero a traves del botón
     @FXML
     public void openImage(ActionEvent event){
-        Stage stage = (Stage) this.btOpenImage.getScene().getWindow();
+        Stage stage = (Stage) this.tpFilters.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
-        this.file = fileChooser.showOpenDialog(stage);
-        this.infoImageLabel.setText(this.file.getName());
+        File imageFile = fileChooser.showOpenDialog(stage);
+        this.imagePathLabel.setText(imageFile.getName());
+        createFilter(imageFile, new ArrayList<String>());
     }
 
-    @FXML
-    private void createFilter(ActionEvent event){
+    private void createFilter(File imageFile, List<String> selectedFilters){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("filter.fxml"));
-            System.out.println(this.filterListView.getSelectionModel().getSelectedItems());
-            List<String> selectedFilters = new ArrayList<String>(this.filterListView.getSelectionModel().getSelectedItems());
-
-            //Creamos el historial
-            HistorialTask historialTask = new HistorialTask(file.getName(), selectedFilters);
-            history.add(historialTask);
-
             //Le pasamos al filterController el fichero seleccionado y los filtros seleccionados
-            FilterController filterController = new FilterController(file, selectedFilters);
+            FilterController filterController = new FilterController(imageFile, selectedFilters);
             loader.setController(filterController);
             VBox filterBox = loader.load();
 
-            String fileName = file.getName();
+            //Creamos el historial
+            SQLiteDB.insertHistorial(imageFile.getName(), String.join(", ", selectedFilters));
+
+            String fileName = imageFile.getName();
             System.out.println(fileName);
-            tpFilter.getTabs().add(new Tab(fileName, filterBox));
+            tpFilters.getTabs().add(new Tab(fileName, filterBox));
         } catch (IOException ioe){
             ioe.printStackTrace();
         }
     }
 
-    public List<HistorialTask> getHistory(){
-        return new ArrayList<>(history);
+    //Metodo para trabajar en modo batch cuando preseleccionamos algun filtro para algun directorio
+    @FXML
+    public void openBatch(ActionEvent event) {
+        List<String> selectedFilters = new ArrayList<String>(
+                this.batchFilterListView.getSelectionModel().getSelectedItems());
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        //Mirar bien si es tpFilter o tpFilters
+        Stage stage = (Stage) this.tpFilters.getScene().getWindow();
+        File folder = directoryChooser.showDialog(stage);
+        if (folder == null)
+            return;
+
+        File[] listOfFiles = folder.listFiles();
+
+        if (listOfFiles != null){
+            for (File imageFile : listOfFiles){
+                if (imageFile.isFile()) {
+                    System.out.println("File: " + imageFile.getName());
+                    createFilter(imageFile, selectedFilters);
+                } else if (imageFile.isDirectory()) {
+                    System.out.println("Directory: " + imageFile.getName());
+
+                }
+            }
+
+        } else {
+            System.out.println("The specified path is not a directory");
+        }
+    }
+
+    @FXML
+    public void exitApplication(ActionEvent event){
+        Platform.exit();
     }
 
     @FXML
     public void showHistorial(){
-        //Obtenemos el historial
-        List<HistorialTask> history = getHistory();
-
-        //Creamos una cadena de caracteres que se concatenará más tarde con el nombre de archivo y filtros
-        StringBuilder message = new StringBuilder("History:\n");
-
-        //Recorremos el array recogiendo todos los nombres de los archivos y su selección de filtros correspondientes
-        for (HistorialTask entry : history){
-            message.append("Archivo: ").append(entry.getImageName()).append("\n");
-            message.append("Filtros: ").append(entry.getAppliedFilters()).append("\n\n");
-        }
-
-        //Creamos un alert para mostrar el la informacion del historial
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("History");
-        alert.setHeaderText(null);
-        alert.setContentText(message.toString());
-        alert.showAndWait();
+        SQLiteDB.showHistorial();
     }
+
 }

@@ -13,10 +13,10 @@ import java.util.List;
 
 public class FilterTask extends Task<BufferedImage> {
 
-    private File sourceImage;
+    private BufferedImage sourceImage;
     private List<String> selectedFilters;
 
-    public FilterTask(File sourceImage, List<String> selectedFilters) throws MalformedURLException {
+    public FilterTask(BufferedImage sourceImage, List<String> selectedFilters) throws MalformedURLException {
         this.sourceImage = sourceImage;
         this.selectedFilters = selectedFilters;
     }
@@ -27,15 +27,15 @@ public class FilterTask extends Task<BufferedImage> {
         int totalProcessedPixels = 0;
         updateMessage("Starting Filter");
         //Convertimos el fichero del principio en una imagen gracias a BufferedImage
-        BufferedImage image = ImageIO.read(this.sourceImage);
+        //BufferedImage image = ImageIO.read(this.sourceImage);
         //Calculamos el tamaño de la imagen (altura x anchura)
-        int imageSize = image.getHeight() * image.getWidth();
+        int imageSize = sourceImage.getHeight() * sourceImage.getWidth();
         float totalProcessed = 0f;
 
-        for (int y = 0; y < image.getHeight(); y++){
+        for (int y = 0; y < sourceImage.getHeight(); y++){
             Thread.sleep(10);
-            for (int x = 0; x < image.getWidth(); x++){
-                Color color = new Color(image.getRGB(x, y));
+            for (int x = 0; x < sourceImage.getWidth(); x++){
+                Color color = new Color(sourceImage.getRGB(x, y));
                 for (String selectedFilter : this.selectedFilters){
                     if (selectedFilter.equals("Grayscale"))
                         color = GrayscaleFilter.apply(color);
@@ -49,7 +49,7 @@ public class FilterTask extends Task<BufferedImage> {
                         color = EnhanceContrastFilter.apply(color);
                 }
                 if (color != null)
-                    image.setRGB(x, y, color.getRGB());
+                    sourceImage.setRGB(x, y, color.getRGB());
 
                     totalProcessedPixels++;
                 updateProgress(totalProcessedPixels, imageSize);
@@ -60,6 +60,6 @@ public class FilterTask extends Task<BufferedImage> {
         }
         updateProgress(totalProcessedPixels, imageSize);
         updateMessage("100 %");
-        return image;
+        return sourceImage;
     }
 }
