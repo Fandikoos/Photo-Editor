@@ -1,9 +1,13 @@
 package com.svalero.downloader.task;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.TextArea;
+
 import java.sql.*;
 
 public class SQLiteDB {
     private static final String JDBC_URL = "jdbc:sqlite:historial.db";
+
 
     public static void initializeDatabase() {
         //Conectamos con la BBDD y creamos nuestra tabla SQL
@@ -36,7 +40,7 @@ public class SQLiteDB {
     }
 
     // Recuperamos todos los registros de la tabla historial
-    public static void showHistorial() {
+    public static void showHistorial(TextArea textArea) {
         try (Connection connection = DriverManager.getConnection(JDBC_URL)) {
             // Consulta SQL para seleccionar todos los registros
             String selectSQL = "SELECT * FROM historial";
@@ -44,11 +48,11 @@ public class SQLiteDB {
                 try (ResultSet resultSet = statement.executeQuery()) {
                     // Iteramos mientras haya una fila siguiente hasta que ya no haya
                     while (resultSet.next()) {
-                        //Los pintamos por pantalla
-                        System.out.println("ID: " + resultSet.getInt("id"));
-                        System.out.println("Archivo: " + resultSet.getString("nameFile"));
-                        System.out.println("Filtros: " + resultSet.getString("selectedFilters"));
-                        System.out.println();
+                        //Los pintamos en el TextArea
+                        textArea.appendText("ID: " + resultSet.getInt("id") + "\n");
+                        textArea.appendText("Archivo: " + resultSet.getString("nameFile") + "\n");
+                        textArea.appendText("Filtros: " + resultSet.getString("selectedFilters") + "\n");
+                        textArea.appendText("\n");
                     }
                 }
             }

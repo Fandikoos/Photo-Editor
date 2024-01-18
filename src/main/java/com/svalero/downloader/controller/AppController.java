@@ -28,6 +28,9 @@ public class AppController implements Initializable {
     private ListView batchFilterListView;
     @FXML
     private Button showHistorial;
+    @FXML
+    private TextArea historialTextArea;
+
 
     ObservableList<String> selectedItems;
 
@@ -111,7 +114,7 @@ public class AppController implements Initializable {
 
     @FXML
     public void showHistorial(){
-        SQLiteDB.showHistorial();
+        SQLiteDB.showHistorial(historialTextArea);
     }
 
 }
